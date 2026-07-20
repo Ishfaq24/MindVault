@@ -1,16 +1,14 @@
-import express from "express";
+import { connectDatabase } from "./database/database.js";
+import { startServer } from "./app/server.js";
 
-const app = express();
+async function bootstrap() {
+  try {
+    await connectDatabase();
+    await startServer();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+}
 
-const PORT = Number(process.env.PORT) || 4000;
-
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "MindVault Backend is running 🚀",
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+bootstrap();
