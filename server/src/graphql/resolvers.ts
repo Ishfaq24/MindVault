@@ -4,6 +4,7 @@ import { authResolvers } from "../modules/auth/index.js";
 export const resolvers = {
   Query: {
     ...healthResolvers.Query,
+    ...authResolvers.Query,
   },
 
   Mutation: {

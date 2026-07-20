@@ -1,10 +1,6 @@
 import { Prisma } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../database/prisma.js";
 
-console.log("Prisma instance:", prisma);
-console.log("prisma.user:", prisma.user);
-console.log("prisma.refreshToken:", prisma.refreshToken);;
-
 export class AuthRepository {
   async findUserByEmail(email: string) {
     return prisma.user.findUnique({
@@ -26,11 +22,59 @@ export class AuthRepository {
   
 
   async createRefreshToken(data: Prisma.RefreshTokenCreateInput) {
-    console.log("prisma.user:", prisma.user);
-console.log("prisma.refreshToken:", prisma.refreshToken);
-    console.log(prisma);
+    
     return prisma.refreshToken.create({
       data,
     });
   }
+  async findUserById(id: string) {
+  return prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+async findRefreshToken(tokenHash: string) {
+  return prisma.refreshToken.findFirst({
+    where: {
+      tokenHash,
+      revokedAt: null,
+    },
+  });
+}
+
+async revokeRefreshToken(id: string) {
+  return prisma.refreshToken.update({
+    where: {
+      id,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
+}
+
+async updatePassword(userId: string, passwordHash: string) {
+  return prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      passwordHash,
+    },
+  });
+}
+
+async revokeAllRefreshTokens(userId: string) {
+  return prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
+}
+
 }
