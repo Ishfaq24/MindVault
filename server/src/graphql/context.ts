@@ -19,13 +19,16 @@ export async function createContext({
 }): Promise<GraphQLContext> {
   const authHeader = req.headers.authorization;
 
+  
   if (!authHeader) {
+    
     return {
       user: null,
     };
   }
 
   if (!authHeader.startsWith("Bearer ")) {
+    console.log("Authorization header is not Bearer.");
     return {
       user: null,
     };
@@ -33,13 +36,23 @@ export async function createContext({
 
   const token = authHeader.replace("Bearer ", "");
 
+  console.log("Access Token:", token);
+
   try {
     const payload = verifyAccessToken(token);
 
+    console.log("JWT Payload:", payload);
+
     return {
-      user: payload,
+      user: {
+        userId: payload.userId,
+        email: payload.email,
+        role: payload.role,
+      },
     };
-  } catch {
+  } catch (error) {
+    console.error("JWT Verification Error:", error);
+
     return {
       user: null,
     };

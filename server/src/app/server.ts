@@ -10,6 +10,7 @@ import { logger } from "../config/logger.js";
 
 import { typeDefs } from "../graphql/schema.js";
 import { resolvers } from "../graphql/resolvers.js";
+import { createContext } from "../graphql/context.js";
 
 export const startServer = async () => {
   const apolloServer = new ApolloServer({
@@ -22,7 +23,9 @@ export const startServer = async () => {
   app.use(
     "/graphql",
     express.json(),
-    expressMiddleware(apolloServer)
+    expressMiddleware(apolloServer, {
+      context: createContext,
+    })
   );
 
   const httpServer = http.createServer(app);
