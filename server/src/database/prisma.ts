@@ -6,6 +6,8 @@ const adapter = new PrismaNeon({
   connectionString: env.DATABASE_URL,
 });
 
+
+
 declare global {
   var prisma: PrismaClient | undefined;
 }
@@ -19,6 +21,7 @@ export const prisma =
         ? ["query", "info", "warn", "error"]
         : ["error"],
   });
+  
 
 if (env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;

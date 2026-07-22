@@ -11,13 +11,12 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().default(4000),
 
-
   // Database
-  
+
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
 
   // Authentication
-  
+
   JWT_ACCESS_SECRET: z
     .string()
     .min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
@@ -31,6 +30,13 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("30d"),
 
   BCRYPT_ROUNDS: z.coerce.number().default(12),
+  SUPABASE_URL: z.string().url(),
+
+  SUPABASE_PUBLISHABLE_KEY: z.string(),
+
+  SUPABASE_SECRET_KEY: z.string(),
+
+  SUPABASE_STORAGE_BUCKET: z.string(),
 });
 
 export const env = envSchema.parse(process.env);
