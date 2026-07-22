@@ -1,0 +1,24 @@
+model File {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  originalName String
+  filename     String
+  extension    String
+  mimeType     String
+
+  size Int
+
+  storageProvider StorageProvider @default(LOCAL)
+  storageKey      String
+
+  status FileStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([status])
+}
