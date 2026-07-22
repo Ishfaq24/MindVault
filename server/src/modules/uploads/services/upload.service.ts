@@ -1,57 +1,112 @@
 import path from "node:path";
 
 import { SupabaseStorageService } from "./supabase-storage.service.js";
-
 import { UploadRepository } from "../repositories/upload.repository.js";
 
-
 export class UploadService {
-  private readonly uploadRepository =
-    new UploadRepository();
+  private readonly uploadRepository = new UploadRepository();
 
-  private readonly storageService =
-  new SupabaseStorageService();
-
-  async getUserFiles(userId: string) {
-    return this.uploadRepository.findUserFiles(userId);
-  }
+  private readonly storageService = new SupabaseStorageService();
 
   async uploadFile(
     userId: string,
-    file: Promise<FileUpload>
+    file: Express.Multer.File
   ) {
-    const upload = await file;
-
     const {
-      filename,
+      originalname,
       mimetype,
-      createReadStream,
-    } = upload;
+      buffer,
+    } = file;
 
-    const stream = createReadStream();
+    const extension = path.extname(originalname);
 
-    const chunks: Buffer[] = [];
+    const result =
+      await this.storageService.upload(
+        buffer,
+        originalname
+      );
 
-    for await (const chunk of stream) {
-      chunks.push(chunk as Buffer);
+    return this.uploadRepository.createFile(
+      userId,
+      {
+        originalName: originalname,
+        filename: originalname,
+        extension,
+        mimeType: mimetype,
+        size: buffer.length,
+        storageKey: result.storageKey,
+      }
+    );
+  }
+
+  async getUserFiles(userId: string) {
+    return this.uploadRepository.findUserFiles(
+      userId
+    );
+  }
+
+  async getFile(
+    fileId: string,
+    userId: string
+  ) {
+    const file =
+      await this.uploadRepository.findById(
+        fileId
+      );
+
+    if (!file) {
+      throw new Error("File not found.");
     }
 
-    const buffer = Buffer.concat(chunks);
+    if (file.ownerId !== userId) {
+      throw new Error("Unauthorized.");
+    }
 
-    const extension = path.extname(filename);
+    return file;
+  }
 
-    const result = await this.storageService.upload(
-      buffer,
-      filename
+  async getDownloadUrl(
+    fileId: string,
+    userId: string
+  ) {
+    const file =
+      await this.getFile(fileId, userId);
+
+    return this.storageService.getSignedUrl(
+      file.storageKey
+    );
+  }
+
+  async deleteFile(
+    fileId: string,
+    userId: string
+  ) {
+    const file =
+      await this.getFile(fileId, userId);
+
+    await this.storageService.delete(
+      file.storageKey
     );
 
-    return this.uploadRepository.createFile(userId, {
-      originalName: filename,
-      filename: result.storageKey,
-      extension,
-      mimeType: mimetype,
-      size: buffer.length,
-      storageKey: result.storageKey,
-    });
+    await this.uploadRepository.delete(
+      file.id
+    );
+
+    return {
+      success: true,
+    };
+  }
+
+  async renameFile(
+    fileId: string,
+    userId: string,
+    filename: string
+  ) {
+    await this.getFile(fileId, userId);
+
+    return this.uploadRepository.rename(
+      fileId,
+      filename
+    );
   }
 }

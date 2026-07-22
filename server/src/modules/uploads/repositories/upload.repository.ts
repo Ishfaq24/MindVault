@@ -2,15 +2,13 @@ import {
   Prisma,
   FileStatus,
 } from "../../../generated/prisma/client.js";
+
 import { prisma } from "../../../database/prisma.js";
 
 import { UploadFileDTO } from "../dto/upload-file.dto.js";
 
 export class UploadRepository {
-  async createFile(
-    ownerId: string,
-    input: UploadFileDTO
-  ) {
+  async createFile(ownerId: string, input: UploadFileDTO) {
     return prisma.file.create({
       data: {
         ownerId,
@@ -26,28 +24,53 @@ export class UploadRepository {
 
   async findById(id: string) {
     return prisma.file.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
     });
   }
-async findUserFiles(ownerId: string) {
-  console.log("ownerId:", ownerId);
-  console.log("prisma.file:", prisma.file);
 
-  return prisma.file.findMany({
-    where: { ownerId },
-    orderBy: {
-      createdAt: Prisma.SortOrder.desc,
-    },
-  });
-}
+  async findUserFiles(ownerId: string) {
+    return prisma.file.findMany({
+      where: {
+        ownerId,
+      },
+      orderBy: {
+        createdAt: Prisma.SortOrder.desc,
+      },
+    });
+  }
+
+  async rename(id: string, filename: string) {
+    return prisma.file.update({
+      where: {
+        id,
+      },
+      data: {
+        filename,
+      },
+    });
+  }
+
+  async delete(id: string) {
+    return prisma.file.delete({
+      where: {
+        id,
+      },
+    });
+  }
 
   async updateStatus(
     id: string,
     status: FileStatus
   ) {
     return prisma.file.update({
-      where: { id },
-      data: { status },
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
     });
   }
 }
