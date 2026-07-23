@@ -1,1 +1,19 @@
+model Document {
+  id String @id @default(cuid())
 
+  fileId String
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  title String?
+
+  contentLength Int
+
+  language String?
+
+  chunks DocumentChunk[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fileId])
+}

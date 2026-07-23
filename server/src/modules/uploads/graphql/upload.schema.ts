@@ -17,6 +17,9 @@ export const uploadTypeDefs = gql`
 
     status: String!
 
+    errorMessage: String
+    processedAt: DateTime
+
     createdAt: DateTime!
     updatedAt: DateTime!
   }

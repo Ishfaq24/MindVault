@@ -62,7 +62,8 @@ export class UploadRepository {
 
   async updateStatus(
     id: string,
-    status: FileStatus
+    status: FileStatus,
+    errorMessage?: string | null
   ) {
     return prisma.file.update({
       where: {
@@ -70,6 +71,11 @@ export class UploadRepository {
       },
       data: {
         status,
+        errorMessage,
+        processedAt:
+          status === FileStatus.READY || status === FileStatus.FAILED
+            ? new Date()
+            : null,
       },
     });
   }

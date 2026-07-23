@@ -8,7 +8,7 @@ import { authenticate } from "../../auth/middleware/auth.middleware.js";
 const router = Router();
 
 const controller = new UploadController();
-console.log("✅ Upload routes loaded");
+console.log("Upload routes loaded");
 router.use(authenticate);
 
 router.post(
@@ -30,6 +30,11 @@ router.get(
 router.get(
   "/:id/download",
   controller.download
+);
+
+router.post(
+  "/:id/reingest",
+  controller.reingest
 );
 
 router.patch(

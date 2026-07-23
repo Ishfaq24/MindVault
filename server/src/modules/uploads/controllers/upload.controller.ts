@@ -10,6 +10,16 @@ export class UploadController {
   private readonly uploadService =
     new UploadService();
 
+  private getParam(
+    value: string | string[] | undefined
+  ) {
+    if (!value || Array.isArray(value)) {
+      throw new Error("Invalid file id.");
+    }
+
+    return value;
+  }
+
   upload = async (
     req: Request,
     res: Response,
@@ -29,7 +39,7 @@ export class UploadController {
           req.file
         );
 
-      res.status(201).json({
+      res.status(202).json({
         success: true,
         data: file,
       });
@@ -66,7 +76,7 @@ export class UploadController {
     try {
       const file =
         await this.uploadService.getFile(
-          req.params.id,
+          this.getParam(req.params.id),
           req.user!.userId
         );
 
@@ -87,7 +97,7 @@ export class UploadController {
     try {
       const url =
         await this.uploadService.getDownloadUrl(
-          req.params.id,
+          this.getParam(req.params.id),
           req.user!.userId
         );
 
@@ -102,6 +112,27 @@ export class UploadController {
     }
   };
 
+  reingest = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const file =
+        await this.uploadService.reingestFile(
+          this.getParam(req.params.id),
+          req.user!.userId
+        );
+
+      res.status(202).json({
+        success: true,
+        data: file,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   rename = async (
     req: Request,
     res: Response,
@@ -110,7 +141,7 @@ export class UploadController {
     try {
       const file =
         await this.uploadService.renameFile(
-          req.params.id,
+          this.getParam(req.params.id),
           req.user!.userId,
           req.body.filename
         );
@@ -131,7 +162,7 @@ export class UploadController {
   ) => {
     try {
       await this.uploadService.deleteFile(
-        req.params.id,
+        this.getParam(req.params.id),
         req.user!.userId
       );
 

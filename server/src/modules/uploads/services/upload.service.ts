@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import { IngestionService } from "../../ingestion/services/ingestion.service.js";
 import { SupabaseStorageService } from "./supabase-storage.service.js";
 import { UploadRepository } from "../repositories/upload.repository.js";
 
@@ -7,6 +8,8 @@ export class UploadService {
   private readonly uploadRepository = new UploadRepository();
 
   private readonly storageService = new SupabaseStorageService();
+
+  private readonly ingestionService = new IngestionService();
 
   async uploadFile(
     userId: string,
@@ -26,7 +29,7 @@ export class UploadService {
         originalname
       );
 
-    return this.uploadRepository.createFile(
+    const savedFile = await this.uploadRepository.createFile(
       userId,
       {
         originalName: originalname,
@@ -37,6 +40,25 @@ export class UploadService {
         storageKey: result.storageKey,
       }
     );
+
+    this.ingestionService.ingest(savedFile.id).catch((error) => {
+      console.error("Ingestion failed:", error);
+    });
+
+    return savedFile;
+  }
+
+  async reingestFile(
+    fileId: string,
+    userId: string
+  ) {
+    const file = await this.getFile(fileId, userId);
+
+    this.ingestionService.ingest(file.id).catch((error) => {
+      console.error("Re-ingestion failed:", error);
+    });
+
+    return this.uploadRepository.findById(file.id);
   }
 
   async getUserFiles(userId: string) {

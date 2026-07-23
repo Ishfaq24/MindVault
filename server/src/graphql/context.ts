@@ -19,8 +19,7 @@ export async function createContext({
 }): Promise<GraphQLContext> {
   const authHeader = req.headers.authorization;
 
-  
-  if (!authHeader) {
+  if (!authHeader || Array.isArray(authHeader)) {
     
     return {
       user: null,

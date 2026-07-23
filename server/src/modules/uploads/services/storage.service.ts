@@ -15,4 +15,8 @@ export abstract class StorageService {
   abstract getSignedUrl(
     storageKey: string
   ): Promise<string>;
+
+  abstract download(
+    storageKey: string
+  ): Promise<Buffer>;
 }
