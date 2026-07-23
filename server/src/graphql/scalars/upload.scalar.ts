@@ -1,1 +1,1 @@
-export { GraphQLUpload } from "graphql-upload";
+export const GraphQLUpload = undefined;

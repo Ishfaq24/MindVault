@@ -52,4 +52,16 @@ export class SupabaseStorageService extends StorageService {
 
     return data.signedUrl;
   }
+
+  async download(storageKey: string): Promise<Buffer> {
+    const { data, error } = await supabase.storage
+      .from(env.SUPABASE_STORAGE_BUCKET)
+      .download(storageKey);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return Buffer.from(await data.arrayBuffer());
+  }
 }

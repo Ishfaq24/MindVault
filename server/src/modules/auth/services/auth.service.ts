@@ -59,11 +59,15 @@ export class AuthService {
       .digest("hex");
 
     await this.authRepository.createRefreshToken({
-      userId: user.id,
       tokenHash: refreshTokenHash,
       expiresAt: new Date(
         Date.now() + 30 * 24 * 60 * 60 * 1000
       ),
+      user: {
+        connect: {
+          id: user.id,
+        },
+      },
     });
 
     return {
