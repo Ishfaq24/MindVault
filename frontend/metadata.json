@@ -1,0 +1,6 @@
+{
+  "name": "MindVault",
+  "description": "AI-powered Personal Knowledge OS Frontend with Knowledge Management, Semantic Search, and RAG Chat",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

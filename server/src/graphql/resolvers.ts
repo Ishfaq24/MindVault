@@ -10,6 +10,8 @@ import { documentResolvers } from "../modules/documents/index.js";
 export const resolvers = {
   ...scalarResolvers,
 
+  User: authResolvers.User,
+
   Query: {
     ...healthResolvers.Query,
     ...authResolvers.Query,

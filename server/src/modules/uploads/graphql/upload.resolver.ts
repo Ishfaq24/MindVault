@@ -12,6 +12,10 @@ export const uploadResolvers = {
       console.log("Context:", context);
       console.log("User:", context.user);
 
+      if (!context.user) {
+        throw new Error("Authentication required.");
+      }
+
       return uploadService.getUserFiles(
         context.user.userId
       );

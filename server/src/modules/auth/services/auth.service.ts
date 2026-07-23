@@ -243,50 +243,61 @@ export class AuthService {
       success: true,
       message: "Successfully logged out",
     };
+  }
+
+  async logoutAllDevices(userId: string) {
+    await this.authRepository.revokeAllRefreshTokens(
+      userId
+    );
+
+    return {
+      success: true,
+      message: "Successfully logged out from all devices",
+    };
+  }
+
+  async changePassword(
+    userId: string,
+    input: ChangePasswordDTO
+  ) {
+    const user = await this.authRepository.findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    async changePassword(
-  userId: string,
-  input: ChangePasswordDTO
-) {
-  const user = await this.authRepository.findUserById(userId);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const isPasswordValid = await comparePassword(
-    input.currentPassword,
-    user.passwordHash
-  );
-
-  if (!isPasswordValid) {
-    throw new Error("Current password is incorrect");
-  }
-
-  if (input.currentPassword === input.newPassword) {
-    throw new Error(
-      "New password must be different from current password"
+    const isPasswordValid = await comparePassword(
+      input.currentPassword,
+      user.passwordHash
     );
+
+    if (!isPasswordValid) {
+      throw new Error("Current password is incorrect");
+    }
+
+    if (input.currentPassword === input.newPassword) {
+      throw new Error(
+        "New password must be different from current password"
+      );
+    }
+
+    const passwordHash = await hashPassword(
+      input.newPassword
+    );
+
+    await this.authRepository.updatePassword(
+      user.id,
+      passwordHash
+    );
+
+    await this.authRepository.revokeAllRefreshTokens(
+      user.id
+    );
+
+    return {
+      success: true,
+      message:
+        "Password changed successfully. Please login again.",
+    };
   }
-
-  const passwordHash = await hashPassword(
-    input.newPassword
-  );
-
-  await this.authRepository.updatePassword(
-    user.id,
-    passwordHash
-  );
-
-  await this.authRepository.revokeAllRefreshTokens(
-    user.id
-  );
-
-  return {
-    success: true,
-    message:
-      "Password changed successfully. Please login again.",
-  };
-}
   }

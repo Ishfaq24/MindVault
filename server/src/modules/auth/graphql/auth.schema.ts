@@ -3,6 +3,7 @@ import { gql } from "graphql-tag";
 export const authTypeDefs = gql`
   type User {
     id: ID!
+    name: String!
     firstName: String!
     lastName: String
     username: String!
@@ -65,6 +66,7 @@ type LogoutPayload {
     login(input: LoginInput!): AuthPayload!
     refreshToken(input: RefreshTokenInput!): AuthPayload!
     logout(input: LogoutInput!): LogoutPayload!
+    logoutAllDevices: LogoutPayload!
     changePassword(input: ChangePasswordInput!): ChangePasswordPayload!
   }
 `;

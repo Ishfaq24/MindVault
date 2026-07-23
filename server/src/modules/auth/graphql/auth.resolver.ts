@@ -8,6 +8,14 @@ import { ChangePasswordDTO } from "../dto/change-password.dto.js";
 const authService = new AuthService();
 
 export const authResolvers = {
+  User: {
+    name(user: { firstName: string; lastName?: string | null }) {
+      return [user.firstName, user.lastName]
+        .filter(Boolean)
+        .join(" ");
+    },
+  },
+
   Query: {
     async me(
       _: unknown,
@@ -43,6 +51,20 @@ export const authResolvers = {
       { input }: { input: LogoutDTO }
     ) {
       return authService.logout(input);
+    },
+
+    async logoutAllDevices(
+      _: unknown,
+      __: unknown,
+      context: GraphQLContext
+    ) {
+      if (!context.user) {
+        throw new Error("Unauthorized");
+      }
+
+      return authService.logoutAllDevices(
+        context.user.userId
+      );
     },
 
     async changePassword(
