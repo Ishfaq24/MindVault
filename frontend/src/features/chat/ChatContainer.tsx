@@ -10,16 +10,35 @@ import { Send, Sparkles, AlertCircle, Bot } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 
+const loadConversations = (): Conversation[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
+    if (!saved) return [];
+
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+
+    const seen = new Set<string>();
+    return parsed.filter((conversation): conversation is Conversation => {
+      if (!conversation || typeof conversation !== 'object' || typeof conversation.id !== 'string') {
+        return false;
+      }
+
+      if (seen.has(conversation.id)) {
+        return false;
+      }
+
+      seen.add(conversation.id);
+      return true;
+    });
+  } catch {
+    return [];
+  }
+};
+
 export const ChatContainer: React.FC = () => {
   const { user } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
 
   const [activeId, setActiveId] = useState<string | null>(() => {
     return localStorage.getItem(STORAGE_KEYS.ACTIVE_CONVERSATION_ID) || null;
@@ -32,7 +51,16 @@ export const ChatContainer: React.FC = () => {
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations));
+    const uniqueConversations = conversations.filter((conversation, index, array) => {
+      return array.findIndex((candidate) => candidate.id === conversation.id) === index;
+    });
+
+    if (uniqueConversations.length !== conversations.length) {
+      setConversations(uniqueConversations);
+      return;
+    }
+
+    localStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(uniqueConversations));
   }, [conversations]);
 
   useEffect(() => {
@@ -56,12 +84,12 @@ export const ChatContainer: React.FC = () => {
 
   const handleNewConversation = () => {
     const newConv: Conversation = {
-      id: `conv_${Date.now()}`,
+      id: `conv_${crypto.randomUUID()}`,
       title: 'New Knowledge Chat',
       updatedAt: new Date().toISOString(),
       messages: [
         {
-          id: `msg_welcome_${Date.now()}`,
+          id: `msg_welcome_${crypto.randomUUID()}`,
           role: 'assistant',
           content: 'Hello! I am your MindVault Personal Knowledge Assistant. Ask me anything about your indexed documents.',
           timestamp: new Date().toISOString(),
@@ -74,6 +102,12 @@ export const ChatContainer: React.FC = () => {
 
   // Ensure an active conversation exists
   useEffect(() => {
+    const uniqueCount = new Set(conversations.map((conversation) => conversation.id)).size;
+
+    if (uniqueCount !== conversations.length) {
+      return;
+    }
+
     if (conversations.length === 0) {
       handleNewConversation();
     } else if (!activeId) {
@@ -100,14 +134,14 @@ export const ChatContainer: React.FC = () => {
     setIsNotImplemented(false);
 
     const userMessage: ChatMessageItem = {
-      id: `msg_u_${Date.now()}`,
+      id: `msg_u_${crypto.randomUUID()}`,
       role: 'user',
       content: userQuery,
       timestamp: new Date().toISOString(),
     };
 
     const thinkingMessage: ChatMessageItem = {
-      id: `msg_a_${Date.now()}`,
+      id: `msg_a_${crypto.randomUUID()}`,
       role: 'assistant',
       content: '',
       timestamp: new Date().toISOString(),
@@ -136,7 +170,7 @@ export const ChatContainer: React.FC = () => {
       const response = await aiService.askAI(userQuery);
 
       const assistantMessage: ChatMessageItem = {
-        id: `msg_a_res_${Date.now()}`,
+        id: `msg_a_res_${crypto.randomUUID()}`,
         role: 'assistant',
         content: response.answer,
         timestamp: new Date().toISOString(),

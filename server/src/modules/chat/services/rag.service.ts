@@ -9,6 +9,13 @@ export class RAGService {
   async ask(ownerId: string, question: string) {
     const chunks = await this.search.search(ownerId, question, 5);
 
+    if (!chunks.length) {
+      return {
+        answer: "I couldn't find that information in your documents.",
+        chunks: [],
+      };
+    }
+
     const context = chunks
       .map((chunk) => chunk.content)
       .join("\n\n");

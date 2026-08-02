@@ -1,5 +1,21 @@
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+
+const normalizeApiBaseUrl = (value: string) => {
+  const normalized = trimTrailingSlash(value || '/api');
+
+  if (normalized === '/uploads') {
+    return '/api';
+  }
+
+  if (normalized.endsWith('/api/uploads')) {
+    return normalized.slice(0, -'/uploads'.length);
+  }
+
+  return normalized;
+};
+
 export const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL || '/graphql';
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || '/api');
 
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'mindvault_access_token',
@@ -12,12 +28,9 @@ export const STORAGE_KEYS = {
 export const ACCEPTED_FILE_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/msword',
   'text/plain',
   'text/markdown',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
+  'text/x-markdown',
 ];
 
-export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB

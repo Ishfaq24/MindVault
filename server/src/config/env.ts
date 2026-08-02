@@ -37,6 +37,7 @@ const envSchema = z.object({
   SUPABASE_SECRET_KEY: z.string(),
 
   SUPABASE_STORAGE_BUCKET: z.string(),
+  USE_LOCAL_STORAGE: z.coerce.boolean().default(false),
 });
 
 export const env = envSchema.parse(process.env);

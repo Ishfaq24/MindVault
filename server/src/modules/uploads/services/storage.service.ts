@@ -5,7 +5,8 @@ export interface UploadResult {
 export abstract class StorageService {
   abstract upload(
     file: Buffer,
-    filename: string
+    filename: string,
+    contentType?: string
   ): Promise<UploadResult>;
 
   abstract delete(

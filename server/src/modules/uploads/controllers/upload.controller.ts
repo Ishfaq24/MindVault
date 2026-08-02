@@ -44,6 +44,7 @@ export class UploadController {
         data: file,
       });
     } catch (error) {
+      console.error("UploadController.upload error:", error);
       next(error);
     }
   };
