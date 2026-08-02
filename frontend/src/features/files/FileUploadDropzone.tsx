@@ -21,11 +21,11 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({ onUpload
     if (file.size > MAX_FILE_SIZE_BYTES) {
       return `File exceeds maximum size limit of ${formatBytes(MAX_FILE_SIZE_BYTES)}`;
     }
-    // Accept if extension is txt, md, pdf, doc, docx, png, jpg, webp or matches mime type
+    // Accept by extension too because some browsers report Markdown as plain text or octet-stream.
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const allowedExts = ['pdf', 'doc', 'docx', 'txt', 'md', 'markdown', 'png', 'jpg', 'jpeg', 'webp'];
+    const allowedExts = ['pdf', 'docx', 'txt', 'md', 'markdown'];
     if (!ACCEPTED_FILE_TYPES.includes(file.type) && (!ext || !allowedExts.includes(ext))) {
-      return `Unsupported file format (.${ext}). Supported: PDF, DOCX, TXT, Markdown, Images.`;
+      return `Unsupported file format (.${ext}). Supported: PDF, DOCX, TXT, and Markdown.`;
     }
     return null;
   };
@@ -60,10 +60,15 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({ onUpload
             prev.map(i => (i.id === item.id ? { ...i, status: 'cancelled', error: 'Upload cancelled by user' } : i))
           );
         } else {
+          const message =
+            err.response?.data?.message ||
+            err.message ||
+            'Upload failed';
+
           setItems(prev =>
-            prev.map(i => (i.id === item.id ? { ...i, status: 'error', error: err.message || 'Upload failed' } : i))
+            prev.map(i => (i.id === item.id ? { ...i, status: 'error', error: message } : i))
           );
-          toast.error(`Failed to upload ${item.file.name}`);
+          toast.error(message);
         }
       });
   };
@@ -73,7 +78,7 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({ onUpload
 
     Array.from(fileList).forEach(file => {
       const error = validateFile(file);
-      const id = `up_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const id = `up_${crypto.randomUUID()}`;
 
       if (error) {
         toast.error(`${file.name}: ${error}`);
@@ -159,7 +164,7 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({ onUpload
           Drag & drop knowledge files here
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">
-          Supports PDF, DOCX, TXT, Markdown, and Images up to {formatBytes(MAX_FILE_SIZE_BYTES)}
+          Supports PDF, DOCX, TXT, and Markdown up to {formatBytes(MAX_FILE_SIZE_BYTES)}
         </p>
 
         <Button

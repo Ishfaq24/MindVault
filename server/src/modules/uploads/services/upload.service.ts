@@ -1,13 +1,13 @@
 import path from "node:path";
 
 import { IngestionService } from "../../ingestion/services/ingestion.service.js";
-import { SupabaseStorageService } from "./supabase-storage.service.js";
 import { UploadRepository } from "../repositories/upload.repository.js";
+import { getStorageService } from "./storage.factory.js";
 
 export class UploadService {
   private readonly uploadRepository = new UploadRepository();
 
-  private readonly storageService = new SupabaseStorageService();
+  private readonly storageService = getStorageService();
 
   private readonly ingestionService = new IngestionService();
 
@@ -26,7 +26,8 @@ export class UploadService {
     const result =
       await this.storageService.upload(
         buffer,
-        originalname
+        originalname,
+        mimetype
       );
 
     const savedFile = await this.uploadRepository.createFile(
@@ -94,9 +95,13 @@ export class UploadService {
     const file =
       await this.getFile(fileId, userId);
 
-    return this.storageService.getSignedUrl(
-      file.storageKey
-    );
+    const storageKey =
+      (file as any).storageProvider === "LOCAL" &&
+      !file.storageKey.startsWith("local:")
+        ? `local:${file.storageKey}`
+        : file.storageKey;
+
+    return this.storageService.getSignedUrl(storageKey);
   }
 
   async deleteFile(
@@ -106,9 +111,13 @@ export class UploadService {
     const file =
       await this.getFile(fileId, userId);
 
-    await this.storageService.delete(
-      file.storageKey
-    );
+    const storageKey =
+      (file as any).storageProvider === "LOCAL" &&
+      !file.storageKey.startsWith("local:")
+        ? `local:${file.storageKey}`
+        : file.storageKey;
+
+    await this.storageService.delete(storageKey);
 
     await this.uploadRepository.delete(
       file.id

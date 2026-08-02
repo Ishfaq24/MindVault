@@ -113,7 +113,7 @@ export const SearchContainer: React.FC = () => {
                   </div>
 
                   <Badge variant="info" size="sm" className="font-bold">
-                    <Percent className="w-3 h-3" /> Math.round({result.score * 100})% Match
+                    <Percent className="w-3 h-3" /> {Math.round(result.score * 100)}% Match
                   </Badge>
                 </div>
 

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "migrate:local-keys": "tsx scripts/migrate-local-storage-keys.ts",
+    "start": "node build/index.js"
   },
   "keywords": [],
   "author": "",
