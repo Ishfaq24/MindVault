@@ -26,9 +26,6 @@ export const uploadService = {
     formData.append('mimeType', file.type || 'application/octet-stream');
 
     const response = await axiosClient.post<ApiResponse<FileMeta>>('/uploads', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
       onUploadProgress: progressEvent => {
         if (progressEvent.total) {
           const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);

@@ -1,0 +1,15 @@
+model Message {
+  id String @id @default(cuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role    MessageRole
+  content String
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+}

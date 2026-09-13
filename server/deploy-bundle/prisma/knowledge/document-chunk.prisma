@@ -1,0 +1,27 @@
+model DocumentChunk {
+  id String @id @default(cuid())
+
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  chunkIndex Int
+  content    String
+
+  startOffset Int
+  endOffset   Int
+
+  characterCount Int
+  wordCount      Int
+  tokenCount     Int
+
+  embedding         Unsupported("vector")?
+  embeddingProvider String?
+  embeddingModel    String?
+  embeddedAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+}

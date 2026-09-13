@@ -31,17 +31,31 @@ export const startServer = async () => {
   const httpServer = http.createServer(app);
 
   return new Promise<void>((resolve, reject) => {
-    httpServer.listen(env.PORT, () => {
-      logger.info(
-        `🚀 Server running at http://localhost:${env.PORT}`
-      );
-
-      logger.info(
-        `🚀 GraphQL Endpoint: http://localhost:${env.PORT}/graphql`
-      );
+    const onListening = () => {
+      if (typeof env.PORT === "number") {
+        logger.info(
+          `🚀 Server running at http://localhost:${env.PORT}`
+        );
+        logger.info(
+          `🚀 GraphQL Endpoint: http://localhost:${env.PORT}/graphql`
+        );
+      } else {
+        logger.info(
+          `🚀 Server running on socket/path: ${env.PORT}`
+        );
+        logger.info(
+          `🚀 GraphQL Endpoint: /graphql`
+        );
+      }
 
       resolve();
-    });
+    };
+
+    if (typeof env.PORT === "number") {
+      httpServer.listen(env.PORT, onListening);
+    } else {
+      httpServer.listen(env.PORT, onListening);
+    }
 
     httpServer.on("error", (error) => {
       logger.error(error);

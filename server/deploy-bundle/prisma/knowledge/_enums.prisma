@@ -1,0 +1,11 @@
+enum FileStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum StorageProvider {
+  LOCAL
+  R2
+}

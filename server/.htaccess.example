@@ -1,0 +1,33 @@
+# ==============================================================================
+# MindVault Backend - cPanel Apache Configuration (.htaccess)
+# ==============================================================================
+#
+# NOTE:
+# If you are using cPanel's "Setup Node.js App" (CloudLinux / Phusion Passenger),
+# cPanel will generate its own .htaccess rules automatically. You do NOT need
+# this file unless you are setting up a reverse proxy manually (e.g. with PM2).
+#
+# If setting up Apache Reverse Proxy (PM2 on a custom port like 4000):
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Pass Authorization header to Node.js
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Support WebSockets (if using ws/subscriptions)
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/?(.*) "ws://127.0.0.1:4000/$1" [P,L]
+
+    # Proxy GraphQL and API requests to the Node.js backend
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
+</IfModule>
+
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+</IfModule>

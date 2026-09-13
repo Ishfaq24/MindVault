@@ -2,7 +2,7 @@ import { EmbeddingService } from "../../embeddings/services/embedding.service.js
 import { SearchRepository } from "../repositories/search.repository.js";
 
 const DEFAULT_LIMIT = 5;
-const DEFAULT_MIN_CONFIDENCE = 0.7;
+const DEFAULT_MIN_CONFIDENCE = 0.35;
 
 export class SearchService {
   private embeddingService = new EmbeddingService();
