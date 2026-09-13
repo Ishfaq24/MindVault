@@ -9,7 +9,7 @@ import { TextChunk } from "../chunking/chunk.types.js";
 
 import { ParserFactory } from "../parsers/parser.factory.js";
 
-import { SupabaseStorageService } from "../../uploads/services/supabase-storage.service.js";
+import { getStorageService } from "../../uploads/services/storage.factory.js";
 import { EmbeddingService } from "../../embeddings/services/embedding.service.js";
 import { EmbeddingRepository } from "../../embeddings/repositories/embedding.repository.js";
 import { IngestionFileRepository } from "../repositories/file.repository.js";
@@ -19,7 +19,7 @@ import { DocumentChunkRepository } from "../repositories/document-chunk.reposito
 export class IngestionService {
   private readonly fileRepository = new IngestionFileRepository();
 
-  private readonly storageService = new SupabaseStorageService();
+  private readonly storageService = getStorageService();
 
   private readonly embeddingService = new EmbeddingService();
 

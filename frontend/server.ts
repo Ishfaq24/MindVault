@@ -41,6 +41,20 @@ const readRequestBody = async (req: Request): Promise<Buffer | undefined> => {
   return chunks.length > 0 ? Buffer.concat(chunks) : undefined;
 };
 
+const responseHopByHopHeaders = new Set([
+  'connection',
+  'content-encoding',
+  'content-length',
+  'expect',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
 const proxyToBackend = async (req: Request, res: Response) => {
   const targetUrl = new URL(req.originalUrl, BACKEND_URL);
   const headers = new Headers();
@@ -59,11 +73,14 @@ const proxyToBackend = async (req: Request, res: Response) => {
       method: req.method,
       headers,
       body,
-    });
+      duplex: body ? 'half' : undefined,
+    } as any);
 
     res.status(backendResponse.status);
     backendResponse.headers.forEach((value, key) => {
-      res.setHeader(key, value);
+      if (!responseHopByHopHeaders.has(key.toLowerCase())) {
+        res.setHeader(key, value);
+      }
     });
 
     const responseBody = Buffer.from(await backendResponse.arrayBuffer());

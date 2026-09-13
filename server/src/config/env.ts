@@ -9,7 +9,13 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
 
-  PORT: z.coerce.number().default(4000),
+  PORT: z
+    .preprocess((val) => {
+      if (val === undefined || val === "") return 4000;
+      const num = Number(val);
+      return Number.isNaN(num) ? val : num;
+    }, z.union([z.number(), z.string()]))
+    .default(4000),
 
   // Database
 
